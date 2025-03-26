@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { Icon } from "@raycast/api";
+import { Icon, popToRoot, closeMainWindow} from "@raycast/api";
 import { DevelopmentTool, DrupalWebsite } from "./interface";
 import os from "os";
 
@@ -46,23 +46,38 @@ export const tools = [
     icon: Icon.LockUnlocked,
   },
   {
+    id: "open_in_cursor",
+    title: "Open in Cursor",
+    action: (website: DrupalWebsite) =>
+      Tool(
+        website,
+        `cursor ${website.root}`,
+        {inprogress: "Preparing to Cursor.",completed: "The project opened in Cursor",},
+        {callback_failed: ()=>{},callback_completed: () => {closeMainWindow();}}),
+    icon: Icon.CodeBlock,
+  },
+  {
     id: "open_in_visual_studio_code",
     title: "Open in Visual Studio Code",
     action: (website: DrupalWebsite) =>
-      Tool(website, `code ${website.root}`, {
-        inprogress: "Preparing to Open in Visual Studio Code.",
-        completed: "The project opened in Visual Studio Code.",
-      }),
+      Tool(
+        website,
+        `code ${website.root}`,
+        {inprogress: "Preparing to Open in Visual Studio Code.",completed: "The project opened in Visual Studio Code.",},
+        {callback_failed: ()=>{},callback_completed: () => {closeMainWindow();}}
+    ),
     icon: Icon.CodeBlock,
   },
   {
     id: "open_in_php_storm",
     title: "Open in PhpStorm",
     action: (website: DrupalWebsite) =>
-      Tool(website, `phpstorm ${website.root}`, {
-        inprogress: "Preparing to Open in PhpStorm.",
-        completed: "The project opened in PhpStorm.",
-      }),
+      Tool(
+        website,
+        `phpstorm ${website.root}`,
+        {inprogress: "Preparing to Open in PhpStorm.",completed: "The project opened in PhpStorm."},
+        {callback_failed: ()=>{},callback_completed: () => {closeMainWindow();}}
+    ),
     icon: Icon.CodeBlock,
   },
 ];
@@ -70,7 +85,8 @@ export const tools = [
 async function Tool(
   drupalWebsite: DrupalWebsite,
   command: string,
-  messages: { inprogress: string; completed: string }
+  messages: { inprogress: string; completed: string },
+  callback?: { callback_failed: Function; callback_completed: Function }
 ) {
   await showToast({
     style: Toast.Style.Animated,
@@ -85,6 +101,8 @@ async function Tool(
         return "fin";
       case DevelopmentTool.Lando:
         return "lando";
+    case DevelopmentTool.MAMP:
+        return "";
       default:
         return "";
     }
@@ -105,6 +123,10 @@ async function Tool(
         style: Toast.Style.Success,
         title: messages.completed,
       });
+      if (callback && callback.callback_completed) {
+          console.log("callback", callback.callback_completed);
+        callback.callback_completed();
+      }
     })
     .catch(async (e: { stderr: string }) => {
       await showToast({
@@ -112,5 +134,8 @@ async function Tool(
         title: "Error Occurred",
         message: e.stderr,
       });
+      if (callback && callback.callback_failed) {
+        callback.callback_failed();
+      }
     });
 }
