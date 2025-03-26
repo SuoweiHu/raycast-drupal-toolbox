@@ -12,6 +12,7 @@ enum DevelopmentTool {
   DDEV = "1",
   Docksal = "2",
   Lando = "3",
+  MAMP = "4",
 }
 
 enum Filter {

@@ -60,6 +60,7 @@ function AddDrupalWebsiteForm(props: {
         <Form.Dropdown.Item value={DevelopmentTool.DDEV} title="DDEV" />
         <Form.Dropdown.Item value={DevelopmentTool.Docksal} title="Docksal" />
         <Form.Dropdown.Item value={DevelopmentTool.Lando} title="Lando" />
+        <Form.Dropdown.Item value={DevelopmentTool.MAMP} title="MAMP" />
       </Form.Dropdown>
 
       <Form.FilePicker
